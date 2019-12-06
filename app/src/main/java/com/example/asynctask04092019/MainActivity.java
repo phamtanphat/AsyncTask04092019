@@ -1,5 +1,6 @@
 package com.example.asynctask04092019;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new DownLoadAsyntask().execute();
             }
         });
     }
@@ -77,14 +79,39 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
 
         }
+        @SuppressLint("WrongThread")
         @Override
         protected Integer doInBackground(Void... voids) {
-            int maxProgress = 0;
-            for ( ; maxProgress <= 100 ; ){
-                maxProgress += new Random().nextInt(10) + 1;
-                Log.d("BBB",maxProgress + "");
+            int currentProgress = 0;
+            for ( ; currentProgress <= 100 ; ){
+                currentProgress += new Random().nextInt(10) + 1;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                publishProgress(currentProgress);
             }
-            return null;
+            return R.mipmap.ic_launcher;
         }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            progressBar.setProgress(values[0]);
+            txtProgress.setText(String.format("%d %%", values[0] >= 100 ? 100 : values[0]));
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            showView(img);
+            hideView(btnDownload);
+            hideView(progressBar);
+            hideView(txtProgress);
+            img.setImageResource(integer);
+            super.onPostExecute(integer);
+        }
+
+
     }
 }
